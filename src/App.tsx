@@ -23,7 +23,7 @@ import { ProvisioningPage } from './pages/admin/ProvisioningPage';
 export const App: React.FC = () => {
   return (
     <AppProvider>
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <Routes>
           {/* Public Auth & Onboarding Flow */}
           <Route path="/login" element={<CustomerLayout />}>
