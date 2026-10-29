@@ -8,6 +8,8 @@ export default defineConfig({
   use: {
     baseURL: 'http://127.0.0.1:5173',
     trace: 'off',
+    video: 'on',
+    viewport: { width: 1280, height: 720 },
   },
   projects: [
     {

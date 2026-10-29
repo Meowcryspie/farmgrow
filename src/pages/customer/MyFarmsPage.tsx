@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import { FarmOneDrawing } from '../../components/graphics/FarmOneDrawing';
@@ -6,8 +6,9 @@ import { FarmTwoDrawing } from '../../components/graphics/FarmTwoDrawing';
 
 export const MyFarmsPage: React.FC = () => {
   const navigate = useNavigate();
-  const { farms, getFarmChip, getDashboardTotals } = useApp();
+  const { farms, getFarmChip, getDashboardTotals, isLiveTelemetry } = useApp();
   const totals = getDashboardTotals();
+  const [filter, setFilter] = useState<'all' | 'attention' | 'online'>('all');
 
   // Compute average EC of online tanks for a farm
   const getAverageEc = (farmId: string) => {
@@ -19,8 +20,19 @@ export const MyFarmsPage: React.FC = () => {
     return (sum / onlineTanks.length).toFixed(2);
   };
 
+  const filteredFarms = farms.filter((f) => {
+    if (filter === 'attention') {
+      const chip = getFarmChip(f);
+      return chip.color === 'red' || chip.color === 'amber';
+    }
+    if (filter === 'online') {
+      return f.tanks.some((t) => !t.isOffline);
+    }
+    return true;
+  });
+
   return (
-    <div style={{ padding: '20px 20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+    <div style={{ padding: '20px 20px 80px 20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* Top Header */}
       <div>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
@@ -37,7 +49,7 @@ export const MyFarmsPage: React.FC = () => {
               My farms
             </h1>
             <span style={{ fontSize: '13px', color: 'var(--color-text-muted)', fontWeight: 500 }}>
-              Sample data
+              {isLiveTelemetry ? 'Live telemetry active' : 'Telemetry paused'}
             </span>
           </div>
 
@@ -47,18 +59,18 @@ export const MyFarmsPage: React.FC = () => {
               padding: '6px 12px',
               fontSize: '13px',
               fontWeight: 600,
-              backgroundColor: 'rgba(255, 255, 255, 0.85)',
             }}
           >
-            <span
-              style={{
-                width: '8px',
-                height: '8px',
-                borderRadius: '50%',
-                backgroundColor: 'var(--color-accent-green)',
-                display: 'inline-block',
-              }}
-            />
+            <span className="beacon-wrap">
+              <span
+                className="beacon-dot"
+                style={{
+                  backgroundColor: 'var(--color-accent-green)',
+                  boxShadow: isLiveTelemetry ? '0 0 8px var(--color-accent-green)' : 'none',
+                }}
+              />
+              {isLiveTelemetry && <span className="beacon-ripple" />}
+            </span>
             <span>{`${totals.onlineCount} of ${totals.totalTanks} online`}</span>
           </div>
         </div>
@@ -81,7 +93,7 @@ export const MyFarmsPage: React.FC = () => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
         {/* Tanks Card */}
         <div className="glass-card-sm" style={{ padding: '14px 12px', textAlign: 'left' }}>
-          <span style={{ fontSize: '13px', color: 'var(--color-text-muted)', fontWeight: 500, display: 'block', marginBottom: '6px' }}>
+          <span style={{ fontSize: '12.5px', color: 'var(--color-text-muted)', fontWeight: 500, display: 'block', marginBottom: '6px' }}>
             Tanks
           </span>
           <span className="mono-val" style={{ fontSize: '26px', fontWeight: 700, color: 'var(--color-text-main)' }}>
@@ -91,7 +103,7 @@ export const MyFarmsPage: React.FC = () => {
 
         {/* Alarms Card */}
         <div className="glass-card-sm" style={{ padding: '14px 12px', textAlign: 'left' }}>
-          <span style={{ fontSize: '13px', color: 'var(--color-text-muted)', fontWeight: 500, display: 'block', marginBottom: '6px' }}>
+          <span style={{ fontSize: '12.5px', color: 'var(--color-text-muted)', fontWeight: 500, display: 'block', marginBottom: '6px' }}>
             Alarms
           </span>
           <span
@@ -108,7 +120,7 @@ export const MyFarmsPage: React.FC = () => {
 
         {/* Offline Card */}
         <div className="glass-card-sm" style={{ padding: '14px 12px', textAlign: 'left' }}>
-          <span style={{ fontSize: '13px', color: 'var(--color-text-muted)', fontWeight: 500, display: 'block', marginBottom: '6px' }}>
+          <span style={{ fontSize: '12.5px', color: 'var(--color-text-muted)', fontWeight: 500, display: 'block', marginBottom: '6px' }}>
             Offline
           </span>
           <span className="mono-val" style={{ fontSize: '26px', fontWeight: 700, color: 'var(--color-text-main)' }}>
@@ -117,9 +129,31 @@ export const MyFarmsPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Quick Filter Bar */}
+      <div style={{ display: 'flex', gap: '8px' }}>
+        <button
+          onClick={() => setFilter('all')}
+          className={`preset-chip ${filter === 'all' ? 'active' : ''}`}
+        >
+          All ({farms.length})
+        </button>
+        <button
+          onClick={() => setFilter('attention')}
+          className={`preset-chip ${filter === 'attention' ? 'active' : ''}`}
+        >
+          Needs Attention ({totals.alarmCount})
+        </button>
+        <button
+          onClick={() => setFilter('online')}
+          className={`preset-chip ${filter === 'online' ? 'active' : ''}`}
+        >
+          Online ({totals.onlineCount})
+        </button>
+      </div>
+
       {/* Farm Cards */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-        {farms.map((farm) => {
+        {filteredFarms.map((farm) => {
           const chip = getFarmChip(farm);
           const avgEc = getAverageEc(farm.id);
 
@@ -131,10 +165,10 @@ export const MyFarmsPage: React.FC = () => {
               style={{
                 cursor: 'pointer',
                 padding: '18px 20px',
-                transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+                transition: 'transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.transform = 'translateY(-3px)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'translateY(0)';
@@ -146,7 +180,7 @@ export const MyFarmsPage: React.FC = () => {
                   width: '100%',
                   maxWidth: '300px',
                   margin: '0 auto 12px auto',
-                  filter: 'drop-shadow(0 8px 18px rgba(20, 70, 45, 0.12))',
+                  filter: 'drop-shadow(0 10px 22px rgba(0, 0, 0, 0.15))',
                 }}
               >
                 {farm.id === 'farm-1' ? <FarmOneDrawing /> : <FarmTwoDrawing />}

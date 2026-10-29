@@ -4,6 +4,16 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="color-scheme" content="light dark" />
+    <script>
+      try {
+        const saved = localStorage.getItem("ec-theme");
+        if (saved === "dark" || saved === "light") {
+          document.querySelector('meta[name="color-scheme"]').content = saved;
+          document.documentElement.setAttribute('data-theme', saved);
+        }
+      } catch (e) {}
+    </script>
     <meta name="theme-color" content="#12804F" />
     <meta name="description" content="EC Link - Remote management and monitoring for Autogrow EC Mini nutrient controllers across farms." />
     <title>EC Link · EC Mini Remote</title>

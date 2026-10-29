@@ -7,12 +7,12 @@ import { FarmTwoDrawing } from '../../components/graphics/FarmTwoDrawing';
 export const FarmDetailPage: React.FC = () => {
   const { farmId } = useParams<{ farmId: string }>();
   const navigate = useNavigate();
-  const { farms, getTankStatus } = useApp();
+  const { farms, getTankStatus, isLiveTelemetry } = useApp();
 
   const farm = farms.find((f) => f.id === farmId) || farms[0];
 
   return (
-    <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+    <div style={{ padding: '16px 20px 80px 20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* Top Bar with Back Button */}
       <div>
         <button
@@ -21,10 +21,10 @@ export const FarmDetailPage: React.FC = () => {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '6px',
-            fontSize: '14.5px',
+            fontSize: '14px',
             fontWeight: 600,
             color: 'var(--color-accent-green)',
-            marginBottom: '14px',
+            marginBottom: '12px',
             padding: '4px 0',
           }}
         >
@@ -45,32 +45,36 @@ export const FarmDetailPage: React.FC = () => {
         >
           {farm.name}
         </h1>
-        <span style={{ fontSize: '14px', color: 'var(--color-text-muted)', fontWeight: 500 }}>
+        <span style={{ fontSize: '13.5px', color: 'var(--color-text-muted)', fontWeight: 500 }}>
           {farm.location}
         </span>
       </div>
 
       {/* Farm Drawing in Glass Card */}
       <div className="glass-card" style={{ padding: '16px' }}>
-        <div style={{ width: '100%', maxWidth: '300px', margin: '0 auto' }}>
+        <div style={{ width: '100%', maxWidth: '300px', margin: '0 auto', filter: 'drop-shadow(0 10px 22px rgba(0, 0, 0, 0.15))' }}>
           {farm.id === 'farm-1' ? <FarmOneDrawing /> : <FarmTwoDrawing />}
         </div>
       </div>
 
       {/* Tanks Section */}
       <div>
-        <h2
-          style={{
-            fontSize: '18px',
-            fontWeight: 700,
-            color: 'var(--color-text-main)',
-            marginBottom: '12px',
-          }}
-        >
-          Tanks
-        </h2>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+          <h2
+            style={{
+              fontSize: '18px',
+              fontWeight: 700,
+              color: 'var(--color-text-main)',
+            }}
+          >
+            Tanks ({farm.tanks.length})
+          </h2>
+          <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
+            Tap tank to inspect telemetry & dosing
+          </span>
+        </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {farm.tanks.map((tank) => {
             const status = getTankStatus(tank);
             const isOffline = tank.isOffline;
@@ -86,7 +90,7 @@ export const FarmDetailPage: React.FC = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  transition: 'transform 0.15s ease',
+                  transition: 'transform 0.18s ease, box-shadow 0.18s ease',
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-2px)';
@@ -102,6 +106,11 @@ export const FarmDetailPage: React.FC = () => {
                       {tank.name}
                     </span>
                     <span className={`pill pill-${status.color}`}>
+                      {!isOffline && isLiveTelemetry && (
+                        <span className="beacon-wrap" style={{ width: '10px', height: '10px' }}>
+                          <span className="beacon-dot" style={{ width: '6px', height: '6px' }} />
+                        </span>
+                      )}
                       {status.label}
                     </span>
                   </div>

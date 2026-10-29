@@ -5,6 +5,13 @@ import { EcGauge } from '../../components/graphics/EcGauge';
 import { HistoryChart } from '../../components/graphics/HistoryChart';
 import { BASE_HISTORY_24H, BASE_HISTORY_7D, RECENT_DOSES } from '../../mockData';
 
+const STAGE_PRESETS = [
+  { label: 'Seedling', target: 0.8 },
+  { label: 'Veg', target: 1.4 },
+  { label: 'Bloom', target: 1.8 },
+  { label: 'Peak', target: 2.2 },
+];
+
 export const TankDetailPage: React.FC = () => {
   const { tankId } = useParams<{ tankId: string }>();
   const navigate = useNavigate();
@@ -17,11 +24,14 @@ export const TankDetailPage: React.FC = () => {
     setAlarmLimits,
     setDosingMode,
     doseOnce,
+    dosingProgress,
     getTankStatus,
+    isLiveTelemetry,
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'reading' | 'control' | 'history'>('reading');
   const [historyRange, setHistoryRange] = useState<'24h' | '7d'>('24h');
+  const [selectedDoseAmount, setSelectedDoseAmount] = useState<number>(20);
 
   // Find farm and tank
   let currentFarm = farms[0];
@@ -40,6 +50,7 @@ export const TankDetailPage: React.FC = () => {
   const currentMode = dosingModes[currentTank.id] || 'Auto';
   const tankStatus = getTankStatus(currentTank, true);
   const pending = pendingTargets[currentTank.id];
+  const activeDosing = dosingProgress[currentTank.id];
 
   // Target Stepper
   const handleTargetChange = (delta: number) => {
@@ -69,8 +80,8 @@ export const TankDetailPage: React.FC = () => {
   const average = shiftedPoints.reduce((a, b) => a + b, 0) / shiftedPoints.length;
 
   return (
-    <div style={{ padding: '16px 20px 80px 20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      {/* Top Bar with Back Button */}
+    <div style={{ padding: '16px 20px 84px 20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      {/* Top Bar with Back Button & Breadcrumbs */}
       <div>
         <button
           onClick={() => navigate(`/app/farm/${currentFarm.id}`)}
@@ -78,7 +89,7 @@ export const TankDetailPage: React.FC = () => {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '6px',
-            fontSize: '14.5px',
+            fontSize: '14px',
             fontWeight: 600,
             color: 'var(--color-accent-green)',
             marginBottom: '10px',
@@ -104,29 +115,33 @@ export const TankDetailPage: React.FC = () => {
             >
               {currentTank.name}
             </h1>
-            <span style={{ fontSize: '14px', color: 'var(--color-text-muted)', fontWeight: 500 }}>
+            <span style={{ fontSize: '13.5px', color: 'var(--color-text-muted)', fontWeight: 500 }}>
               {currentTank.subLabel}
             </span>
           </div>
 
-          <span className={`pill ${isOffline ? 'pill-grey' : 'pill-green'}`}>
-            <span
-              style={{
-                width: '7px',
-                height: '7px',
-                borderRadius: '50%',
-                backgroundColor: isOffline ? '#889890' : 'var(--color-accent-green)',
-              }}
-            />
-            {isOffline ? 'Offline' : 'Online'}
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span className={`pill ${isOffline ? 'pill-grey' : 'pill-green'}`}>
+              <span className="beacon-wrap">
+                <span
+                  className="beacon-dot"
+                  style={{
+                    backgroundColor: isOffline ? '#889890' : 'var(--color-accent-green)',
+                    boxShadow: !isOffline && isLiveTelemetry ? '0 0 8px var(--color-accent-green)' : 'none',
+                  }}
+                />
+                {!isOffline && isLiveTelemetry && <span className="beacon-ripple" />}
+              </span>
+              <span>{isOffline ? 'Offline' : 'Online'}</span>
+            </span>
+          </div>
         </div>
       </div>
 
       {/* TAB 1: READING */}
       {activeTab === 'reading' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {/* Gauge Card */}
+          {/* Gauge Card with Live Specular Arc */}
           <div
             className="glass-card"
             style={{
@@ -134,6 +149,8 @@ export const TankDetailPage: React.FC = () => {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
+              position: 'relative',
+              overflow: 'hidden',
             }}
           >
             <EcGauge
@@ -189,12 +206,44 @@ export const TankDetailPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Footer Line */}
-          <div style={{ textAlign: 'center', padding: '6px 0' }}>
-            <span style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>
+          {/* Quick Action Bar for Instant Dosing */}
+          <div className="glass-card" style={{ padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <strong style={{ fontSize: '14px', color: 'var(--color-text-main)', display: 'block' }}>
+                Quick Dose
+              </strong>
+              <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
+                Pulse nutrient pump for 20ml
+              </span>
+            </div>
+
+            <button
+              onClick={() => doseOnce(currentFarm.id, currentTank.id, 20)}
+              disabled={activeDosing?.isDosing || isOffline}
+              className="btn-secondary"
+              style={{
+                height: '40px',
+                padding: '0 16px',
+                opacity: isOffline ? 0.5 : 1,
+                borderColor: 'var(--color-accent-green)',
+                color: 'var(--color-accent-green)',
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+              </svg>
+              {activeDosing?.isDosing ? 'Dosing...' : 'Dose 20ml'}
+            </button>
+          </div>
+
+          {/* Footer Line with Live Pulse Indicator */}
+          <div style={{ textAlign: 'center', padding: '4px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '12.5px', color: 'var(--color-text-muted)' }}>
               {isOffline
                 ? 'No signal from this tank since 2 h ago.'
-                : 'Sample data. Updated 12 s ago.'}
+                : isLiveTelemetry
+                ? 'Live Telemetry · Streaming every 3.5s · 24ms ping'
+                : 'Telemetry paused · Last updated 12 s ago.'}
             </span>
           </div>
         </div>
@@ -203,11 +252,27 @@ export const TankDetailPage: React.FC = () => {
       {/* TAB 2: CONTROL */}
       {activeTab === 'control' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {/* Target EC Card */}
+          {/* Target EC Card with Crop Presets */}
           <div className="glass-card" style={{ padding: '20px' }}>
-            <span style={{ fontSize: '13.5px', color: 'var(--color-text-muted)', fontWeight: 600, display: 'block', marginBottom: '14px' }}>
-              Target EC (mS/cm)
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+              <span style={{ fontSize: '13.5px', color: 'var(--color-text-muted)', fontWeight: 600 }}>
+                Target EC (mS/cm)
+              </span>
+
+              {/* Crop presets */}
+              <div style={{ display: 'flex', gap: '6px' }}>
+                {STAGE_PRESETS.map((stage) => (
+                  <button
+                    key={stage.label}
+                    onClick={() => setTankTarget(currentFarm.id, currentTank.id, stage.target)}
+                    className={`preset-chip ${Math.abs(currentTank.target - stage.target) < 0.05 ? 'active' : ''}`}
+                    title={`Set target to ${stage.target} EC`}
+                  >
+                    {stage.label}
+                  </button>
+                ))}
+              </div>
+            </div>
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
               <button
@@ -218,9 +283,14 @@ export const TankDetailPage: React.FC = () => {
                 −
               </button>
 
-              <span className="mono-val" style={{ fontSize: '46px', fontWeight: 700, color: 'var(--color-text-main)' }}>
-                {currentTank.target.toFixed(1)}
-              </span>
+              <div style={{ textAlign: 'center' }}>
+                <span className="mono-val" style={{ fontSize: '48px', fontWeight: 700, color: 'var(--color-text-main)', lineHeight: 1 }}>
+                  {currentTank.target.toFixed(1)}
+                </span>
+                <span style={{ fontSize: '12px', color: 'var(--color-text-muted)', display: 'block', marginTop: '4px' }}>
+                  mS/cm
+                </span>
+              </div>
 
               <button
                 className="stepper-btn-lg"
@@ -244,17 +314,17 @@ export const TankDetailPage: React.FC = () => {
                 </span>
               )}
               {!pending && (
-                <span style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>
-                  Tap + or − to adjust controller setpoint
+                <span style={{ fontSize: '12.5px', color: 'var(--color-text-muted)' }}>
+                  Use + / − steppers or crop presets above to adjust setpoint
                 </span>
               )}
             </div>
           </div>
 
-          {/* Dosing Card */}
+          {/* Dosing Control & Animated Pump Card */}
           <div className="glass-card" style={{ padding: '20px' }}>
             <span style={{ fontSize: '13.5px', color: 'var(--color-text-muted)', fontWeight: 600, display: 'block', marginBottom: '12px' }}>
-              Dosing mode
+              Dosing Mode & Manual Injection
             </span>
 
             {/* Auto / Pause Segmented Control */}
@@ -264,28 +334,105 @@ export const TankDetailPage: React.FC = () => {
                 className={`segment-btn ${currentMode === 'Auto' ? 'active' : ''}`}
                 onClick={() => setDosingMode(currentTank.id, 'Auto')}
               >
-                Auto
+                Auto Dosing
               </button>
               <button
                 type="button"
                 className={`segment-btn ${currentMode === 'Pause' ? 'active' : ''}`}
                 onClick={() => setDosingMode(currentTank.id, 'Pause')}
               >
-                Pause
+                Paused
               </button>
             </div>
 
-            {/* Dose once button */}
-            <button
-              onClick={() => doseOnce(currentFarm.id, currentTank.id)}
-              className="btn-secondary"
-              style={{ width: '100%', height: '48px', justifyContent: 'center' }}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-              </svg>
-              Dose once (adds 1 to total doses)
-            </button>
+            {/* Dosing Amount Selector */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+              <span style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>
+                Pulse volume:
+              </span>
+              <div style={{ display: 'flex', gap: '6px' }}>
+                {[10, 20, 50].map((amount) => (
+                  <button
+                    key={amount}
+                    onClick={() => setSelectedDoseAmount(amount)}
+                    className={`preset-chip ${selectedDoseAmount === amount ? 'active' : ''}`}
+                  >
+                    {amount}ml
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Active Dosing Animation Progress */}
+            {activeDosing?.isDosing ? (
+              <div
+                style={{
+                  padding: '14px',
+                  borderRadius: '14px',
+                  background: 'rgba(0, 229, 117, 0.12)',
+                  border: '1px solid var(--color-accent-green)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="var(--color-accent-green)"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      style={{ animation: 'spin 1.2s linear infinite' }}
+                    >
+                      <line x1="12" y1="2" x2="12" y2="6" />
+                      <line x1="12" y1="18" x2="12" y2="22" />
+                      <line x1="4.93" y1="4.93" x2="7.76" y2="7.76" />
+                      <line x1="16.24" y1="16.24" x2="19.07" y2="19.07" />
+                      <line x1="2" y1="12" x2="6" y2="12" />
+                      <line x1="18" y1="12" x2="22" y2="12" />
+                      <line x1="4.93" y1="19.07" x2="7.76" y2="16.24" />
+                      <line x1="16.24" y1="7.76" x2="19.07" y2="4.93" />
+                    </svg>
+                    <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--color-accent-green)' }}>
+                      Pumping {activeDosing.ml}ml nutrient mix...
+                    </span>
+                  </div>
+                  <span className="mono-val" style={{ fontSize: '13px', fontWeight: 700, color: 'var(--color-accent-green)' }}>
+                    {activeDosing.progress}%
+                  </span>
+                </div>
+
+                {/* Progress bar */}
+                <div style={{ width: '100%', height: '6px', borderRadius: '3px', background: 'rgba(255, 255, 255, 0.2)', overflow: 'hidden' }}>
+                  <div
+                    style={{
+                      width: `${activeDosing.progress}%`,
+                      height: '100%',
+                      background: 'var(--color-accent-green)',
+                      borderRadius: '3px',
+                      transition: 'width 0.35s ease',
+                    }}
+                  />
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => doseOnce(currentFarm.id, currentTank.id, selectedDoseAmount)}
+                disabled={isOffline}
+                className="btn-primary"
+                style={{ height: '48px' }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                </svg>
+                Dispense {selectedDoseAmount}ml now
+              </button>
+            )}
           </div>
 
           {/* Alarm Limits Card */}
@@ -357,7 +504,7 @@ export const TankDetailPage: React.FC = () => {
             </div>
 
             <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginTop: '16px', lineHeight: 1.4 }}>
-              The controller checks every change and refuses values outside its safe range.
+              The controller automatically verifies every threshold change and safeguards crops against extreme chemical drift.
             </p>
           </div>
         </div>
@@ -442,7 +589,7 @@ export const TankDetailPage: React.FC = () => {
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     paddingBottom: idx < RECENT_DOSES.length - 1 ? '10px' : 0,
-                    borderBottom: idx < RECENT_DOSES.length - 1 ? '1px solid rgba(20, 60, 40, 0.08)' : 'none',
+                    borderBottom: idx < RECENT_DOSES.length - 1 ? '1px solid var(--color-border-subtle)' : 'none',
                   }}
                 >
                   <span style={{ fontSize: '14px', color: 'var(--color-text-main)' }}>
@@ -458,15 +605,14 @@ export const TankDetailPage: React.FC = () => {
         </div>
       )}
 
-      {/* FIXED BOTTOM TAB BAR */}
+      {/* FIXED BOTTOM FLOATING TAB BAR */}
       <div className="bottom-tab-bar">
         {/* Tab 1: Reading */}
         <button
           onClick={() => setActiveTab('reading')}
           className={`tab-btn ${activeTab === 'reading' ? 'active' : ''}`}
         >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 2v20M2 12h20" opacity="0.3" />
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="9" />
             <path d="M12 7v5l3 3" />
           </svg>
@@ -478,7 +624,7 @@ export const TankDetailPage: React.FC = () => {
           onClick={() => setActiveTab('control')}
           className={`tab-btn ${activeTab === 'control' ? 'active' : ''}`}
         >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="3" />
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
           </svg>
@@ -490,7 +636,7 @@ export const TankDetailPage: React.FC = () => {
           onClick={() => setActiveTab('history')}
           className={`tab-btn ${activeTab === 'history' ? 'active' : ''}`}
         >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M3 3v18h18" />
             <path d="M19 9l-5 5-4-4-3 3" />
           </svg>

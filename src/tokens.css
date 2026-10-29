@@ -1,10 +1,13 @@
 :root {
-  /* Colors */
+  color-scheme: light dark;
+
+  /* Base Light Theme (Daylight Botany) */
   --color-text-main: #14201A;
   --color-text-muted: #52645A;
   --color-accent-green: #12804F;
   --color-accent-dark: #0F6B42;
   --color-accent-light: #1FA66A;
+  --color-accent-glow: rgba(18, 128, 79, 0.25);
   --color-amber: #A85F00;
   --color-amber-tick: #E39A2D;
   --color-amber-grid: #E3B45F;
@@ -12,23 +15,24 @@
   --color-track-grey: #DCE8E0;
   --color-border-subtle: rgba(20, 60, 40, 0.12);
   --color-border-input: rgba(20, 60, 40, 0.18);
+  --color-surface-elevated: #FFFFFF;
   
   /* Fonts */
   --font-sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'IBM Plex Mono', monospace;
 
   /* Backgrounds */
-  --page-bg-base: #FFFFFF;
+  --page-bg-base: #F8FAF9;
   --page-bg-glows: 
     radial-gradient(circle at 10% 6%, rgba(110, 225, 170, 0.38), transparent 40%),
-    radial-gradient(circle at 95% 20%, rgba(120, 190, 255, 0.32), transparent 40%),
+    radial-gradient(circle at 95% 20%, rgba(120, 190, 255, 0.30), transparent 40%),
     radial-gradient(circle at 75% 95%, rgba(190, 235, 140, 0.32), transparent 45%);
 
   /* Glassmorphism */
-  --glass-card-bg: linear-gradient(145deg, rgba(255, 255, 255, 0.82), rgba(214, 240, 226, 0.50));
+  --glass-card-bg: linear-gradient(145deg, rgba(255, 255, 255, 0.88), rgba(220, 242, 230, 0.55));
   --glass-card-border: 1px solid rgba(255, 255, 255, 0.95);
-  --glass-card-shadow: 0 10px 28px rgba(20, 70, 45, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.95);
-  --glass-blur: blur(16px);
+  --glass-card-shadow: 0 10px 28px rgba(20, 70, 45, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  --glass-blur: blur(18px);
 
   /* Element Radii */
   --radius-card-lg: 20px;
@@ -38,4 +42,72 @@
   --radius-pill: 9999px;
   --radius-stepper-lg: 18px;
   --radius-stepper-sm: 14px;
+}
+
+/* Reflect meta override in CSS as per modern web guidance */
+:root:has(> head > meta[name="color-scheme"][content="dark"]),
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+:root:has(> head > meta[name="color-scheme"][content="light"]),
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+/* Dark Mode Tokens (OLED Emerald Noir) */
+:root[data-theme="dark"],
+:root:has(> head > meta[name="color-scheme"][content="dark"]) {
+  --color-text-main: #F3F8F5;
+  --color-text-muted: #8AA89B;
+  --color-accent-green: #00E575;
+  --color-accent-dark: #00B359;
+  --color-accent-light: #38FF9D;
+  --color-accent-glow: rgba(0, 229, 117, 0.35);
+  --color-amber: #FFB340;
+  --color-amber-tick: #FFB340;
+  --color-amber-grid: #E5A030;
+  --color-red: #FF5449;
+  --color-track-grey: #1A2821;
+  --color-border-subtle: rgba(255, 255, 255, 0.10);
+  --color-border-input: rgba(255, 255, 255, 0.18);
+  --color-surface-elevated: #131E18;
+
+  --page-bg-base: #090E0B;
+  --page-bg-glows: 
+    radial-gradient(circle at 12% 8%, rgba(0, 229, 117, 0.18), transparent 42%),
+    radial-gradient(circle at 92% 18%, rgba(0, 140, 255, 0.15), transparent 38%),
+    radial-gradient(circle at 75% 92%, rgba(0, 210, 120, 0.14), transparent 45%);
+
+  --glass-card-bg: linear-gradient(145deg, rgba(20, 31, 26, 0.88), rgba(12, 19, 16, 0.78));
+  --glass-card-border: 1px solid rgba(255, 255, 255, 0.12);
+  --glass-card-shadow: 0 16px 38px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not(:has(> head > meta[name="color-scheme"][content="light"])) {
+    --color-text-main: #F3F8F5;
+    --color-text-muted: #8AA89B;
+    --color-accent-green: #00E575;
+    --color-accent-dark: #00B359;
+    --color-accent-light: #38FF9D;
+    --color-accent-glow: rgba(0, 229, 117, 0.35);
+    --color-amber: #FFB340;
+    --color-amber-tick: #FFB340;
+    --color-amber-grid: #E5A030;
+    --color-red: #FF5449;
+    --color-track-grey: #1A2821;
+    --color-border-subtle: rgba(255, 255, 255, 0.10);
+    --color-border-input: rgba(255, 255, 255, 0.18);
+    --color-surface-elevated: #131E18;
+
+    --page-bg-base: #090E0B;
+    --page-bg-glows: 
+      radial-gradient(circle at 12% 8%, rgba(0, 229, 117, 0.18), transparent 42%),
+      radial-gradient(circle at 92% 18%, rgba(0, 140, 255, 0.15), transparent 38%),
+      radial-gradient(circle at 75% 92%, rgba(0, 210, 120, 0.14), transparent 45%);
+
+    --glass-card-bg: linear-gradient(145deg, rgba(20, 31, 26, 0.88), rgba(12, 19, 16, 0.78));
+    --glass-card-border: 1px solid rgba(255, 255, 255, 0.12);
+    --glass-card-shadow: 0 16px 38px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  }
 }
