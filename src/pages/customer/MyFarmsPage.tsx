@@ -84,7 +84,7 @@ export const MyFarmsPage: React.FC = () => {
           <span style={{ fontSize: '13px', color: 'var(--color-text-muted)', fontWeight: 500, display: 'block', marginBottom: '6px' }}>
             Tanks
           </span>
-          <span style={{ fontSize: '26px', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--color-text-main)' }}>
+          <span className="mono-val" style={{ fontSize: '26px', fontWeight: 700, color: 'var(--color-text-main)' }}>
             {totals.totalTanks}
           </span>
         </div>
@@ -95,10 +95,10 @@ export const MyFarmsPage: React.FC = () => {
             Alarms
           </span>
           <span
+            className="mono-val"
             style={{
               fontSize: '26px',
               fontWeight: 700,
-              fontFamily: 'var(--font-mono)',
               color: totals.alarmCount > 0 ? 'var(--color-red)' : 'var(--color-text-main)',
             }}
           >
@@ -111,7 +111,7 @@ export const MyFarmsPage: React.FC = () => {
           <span style={{ fontSize: '13px', color: 'var(--color-text-muted)', fontWeight: 500, display: 'block', marginBottom: '6px' }}>
             Offline
           </span>
-          <span style={{ fontSize: '26px', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--color-text-main)' }}>
+          <span className="mono-val" style={{ fontSize: '26px', fontWeight: 700, color: 'var(--color-text-main)' }}>
             {totals.offlineCount}
           </span>
         </div>
