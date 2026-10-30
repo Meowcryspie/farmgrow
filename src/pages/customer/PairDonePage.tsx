@@ -5,10 +5,11 @@ import { useApp } from '../../context/AppContext';
 
 export const PairDonePage: React.FC = () => {
   const navigate = useNavigate();
-  const { pairingState, updatePairingState } = useApp();
+  const { pairingState, updatePairingState, showToast } = useApp();
 
   const handleFinish = (e: React.FormEvent) => {
     e.preventDefault();
+    showToast('Device Paired Successfully', `${pairingState.tankName} has been attached to ${pairingState.farmChoice}`, 'success');
     navigate('/app');
   };
 
@@ -27,8 +28,9 @@ export const PairDonePage: React.FC = () => {
               width: '38px',
               height: '38px',
               borderRadius: '12px',
-              background: 'rgba(255, 255, 255, 0.7)',
+              background: 'var(--color-surface-elevated)',
               border: '1px solid var(--color-border-subtle)',
+              color: 'var(--color-text-main)',
             }}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -65,7 +67,7 @@ export const PairDonePage: React.FC = () => {
             marginBottom: '20px',
           }}
         >
-          Now tell us where it belongs.
+          Device securely paired. Assign it to a farm and crop area.
         </p>
 
         {/* Glass Checklist with 4 Green Checks */}
@@ -91,6 +93,7 @@ export const PairDonePage: React.FC = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  boxShadow: '0 0 10px var(--color-accent-glow)',
                 }}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -101,7 +104,7 @@ export const PairDonePage: React.FC = () => {
                 Device found
               </span>
             </div>
-            <span style={{ fontSize: '14px', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>
+            <span className="mono-val" style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-text-main)' }}>
               {pairingState.claimCode}
             </span>
           </div>
@@ -118,6 +121,7 @@ export const PairDonePage: React.FC = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  boxShadow: '0 0 10px var(--color-accent-glow)',
                 }}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -128,7 +132,7 @@ export const PairDonePage: React.FC = () => {
                 Joined WiFi
               </span>
             </div>
-            <span style={{ fontSize: '14px', fontWeight: 600 }}>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-text-main)' }}>
               {pairingState.selectedWifi}
             </span>
           </div>
@@ -145,6 +149,7 @@ export const PairDonePage: React.FC = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  boxShadow: '0 0 10px var(--color-accent-glow)',
                 }}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -152,11 +157,11 @@ export const PairDonePage: React.FC = () => {
                 </svg>
               </span>
               <span style={{ fontSize: '14.5px', color: 'var(--color-text-main)' }}>
-                Secure link to the server
+                Encrypted cloud sync
               </span>
             </div>
-            <span style={{ fontSize: '14px', color: 'var(--color-text-muted)' }}>
-              Encrypted
+            <span style={{ fontSize: '13.5px', color: 'var(--color-accent-green)', fontWeight: 600 }}>
+              TLS 1.3 Active
             </span>
           </div>
 
@@ -172,6 +177,7 @@ export const PairDonePage: React.FC = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  boxShadow: '0 0 10px var(--color-accent-glow)',
                 }}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -179,10 +185,10 @@ export const PairDonePage: React.FC = () => {
                 </svg>
               </span>
               <span style={{ fontSize: '14.5px', color: 'var(--color-text-main)' }}>
-                First reading received
+                First telemetry packet
               </span>
             </div>
-            <span style={{ fontSize: '14.5px', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
+            <span className="mono-val" style={{ fontSize: '14.5px', fontWeight: 700, color: 'var(--color-text-main)' }}>
               1.72 mS/cm
             </span>
           </div>

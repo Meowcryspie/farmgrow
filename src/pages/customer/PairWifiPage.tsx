@@ -8,7 +8,12 @@ import { useApp } from '../../context/AppContext';
 
 export const PairWifiPage: React.FC = () => {
   const navigate = useNavigate();
-  const { pairingState, updatePairingState } = useApp();
+  const { pairingState, updatePairingState, showToast } = useApp();
+
+  const handleSelectNetwork = (ssid: string) => {
+    updatePairingState({ selectedWifi: ssid });
+    showToast('WiFi Selected', `Selected network: ${ssid}`, 'info');
+  };
 
   return (
     <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', minHeight: '100vh', justifyContent: 'space-between' }}>
@@ -25,8 +30,9 @@ export const PairWifiPage: React.FC = () => {
               width: '38px',
               height: '38px',
               borderRadius: '12px',
-              background: 'rgba(255, 255, 255, 0.7)',
+              background: 'var(--color-surface-elevated)',
               border: '1px solid var(--color-border-subtle)',
+              color: 'var(--color-text-main)',
             }}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -51,7 +57,7 @@ export const PairWifiPage: React.FC = () => {
             fontWeight: 700,
             color: 'var(--color-text-main)',
             letterSpacing: '-0.5px',
-            marginBottom: '20px',
+            marginBottom: '18px',
           }}
         >
           Connect it to WiFi
@@ -65,7 +71,7 @@ export const PairWifiPage: React.FC = () => {
             alignItems: 'center',
             gap: '16px',
             padding: '16px',
-            marginBottom: '24px',
+            marginBottom: '22px',
           }}
         >
           <div style={{ width: '90px', flexShrink: 0 }}>
@@ -87,14 +93,14 @@ export const PairWifiPage: React.FC = () => {
               return (
                 <div
                   key={net.ssid}
-                  onClick={() => updatePairingState({ selectedWifi: net.ssid })}
+                  onClick={() => handleSelectNetwork(net.ssid)}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     padding: '14px 16px',
                     borderRadius: 'var(--radius-input)',
-                    background: isSelected ? 'rgba(230, 246, 238, 0.7)' : 'rgba(255, 255, 255, 0.85)',
+                    background: isSelected ? 'var(--color-accent-glow)' : 'var(--color-surface-elevated)',
                     border: isSelected
                       ? '2px solid var(--color-accent-green)'
                       : '1px solid var(--color-border-input)',
@@ -111,7 +117,7 @@ export const PairWifiPage: React.FC = () => {
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     {net.locked && (
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#52645A" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                         <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                       </svg>

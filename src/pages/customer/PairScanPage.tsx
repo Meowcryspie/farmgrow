@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ProgressSegments } from '../../components/common/ProgressSegments';
 import { QrCodeGraphic } from '../../components/graphics/QrCodeGraphic';
@@ -6,7 +6,17 @@ import { useApp } from '../../context/AppContext';
 
 export const PairScanPage: React.FC = () => {
   const navigate = useNavigate();
-  const { pairingState, updatePairingState } = useApp();
+  const { pairingState, updatePairingState, showToast } = useApp();
+  const [isScanning, setIsScanning] = useState(false);
+
+  const handleSimulateScan = () => {
+    setIsScanning(true);
+    showToast('QR Code Detected', 'Scanned ECM-4F2A-91C7 successfully!', 'success');
+    updatePairingState({ claimCode: 'ECM-4F2A-91C7' });
+    setTimeout(() => {
+      navigate('/pair/wifi');
+    }, 700);
+  };
 
   return (
     <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', minHeight: '100vh', justifyContent: 'space-between' }}>
@@ -14,7 +24,7 @@ export const PairScanPage: React.FC = () => {
         {/* Navigation Bar */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <button
-            onClick={() => navigate('/signup')}
+            onClick={() => navigate('/login')}
             aria-label="Back"
             style={{
               display: 'flex',
@@ -23,8 +33,9 @@ export const PairScanPage: React.FC = () => {
               width: '38px',
               height: '38px',
               borderRadius: '12px',
-              background: 'rgba(255, 255, 255, 0.7)',
+              background: 'var(--color-surface-elevated)',
               border: '1px solid var(--color-border-subtle)',
+              color: 'var(--color-text-main)',
             }}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -68,14 +79,29 @@ export const PairScanPage: React.FC = () => {
             fontSize: '14.5px',
             color: 'var(--color-text-muted)',
             lineHeight: 1.45,
-            marginBottom: '24px',
+            marginBottom: '20px',
           }}
         >
-          Point the camera at the QR code on the label, on the side of the controller.
+          Point the camera at the QR code on the controller or tap the scanner viewfinder to simulate pairing.
         </p>
 
-        {/* Camera Viewport Graphic */}
-        <div style={{ margin: '0 auto 28px auto' }}>
+        {/* Camera Viewport Graphic with Interactive Click */}
+        <div
+          onClick={handleSimulateScan}
+          title="Tap to simulate successful QR scan"
+          style={{
+            margin: '0 auto 24px auto',
+            cursor: 'pointer',
+            transition: 'transform 0.2s ease',
+            filter: isScanning ? 'drop-shadow(0 0 24px var(--color-accent-green))' : 'none',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'scale(1.02)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
+          }}
+        >
           <QrCodeGraphic size={260} showScanAnimation={true} />
         </div>
 
@@ -96,12 +122,19 @@ export const PairScanPage: React.FC = () => {
       </div>
 
       {/* Action Button */}
-      <div style={{ paddingBottom: '24px', marginTop: '20px' }}>
+      <div style={{ paddingBottom: '24px', marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
         <button
           onClick={() => navigate('/pair/wifi')}
           className="btn-primary"
         >
           Continue
+        </button>
+        <button
+          onClick={handleSimulateScan}
+          className="btn-secondary"
+          style={{ width: '100%', height: '44px', justifyContent: 'center' }}
+        >
+          ⚡ Simulate Camera Scan
         </button>
       </div>
     </div>

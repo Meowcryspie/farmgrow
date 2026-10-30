@@ -12,7 +12,6 @@ export const DevicesListPage: React.FC = () => {
   const filteredDevices = ADMIN_DEVICES.filter((d) => {
     // Status filter
     if (filter === 'Online') {
-      // In the specification: Online includes alarm devices, but excludes offline
       if (d.status === 'Offline') return false;
     } else if (filter === 'Alarm') {
       if (d.status !== 'Alarm') return false;
@@ -43,13 +42,13 @@ export const DevicesListPage: React.FC = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
       {/* Top Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <h1 style={{ fontSize: '30px', fontWeight: 700, color: 'var(--color-text-main)', letterSpacing: '-0.5px' }}>
             Devices
           </h1>
           <p style={{ fontSize: '14px', color: 'var(--color-text-muted)' }}>
-            Every paired EC Mini, with its connection health. Sample data.
+            Every paired EC Mini, with its connection health and firmware status. Sample data.
           </p>
         </div>
 
@@ -89,10 +88,12 @@ export const DevicesListPage: React.FC = () => {
                   gap: '6px',
                   background: isSelected
                     ? 'linear-gradient(135deg, var(--color-accent-dark), var(--color-accent-green))'
-                    : 'rgba(255, 255, 255, 0.85)',
+                    : 'var(--color-surface-elevated)',
                   color: isSelected ? '#FFFFFF' : 'var(--color-text-main)',
                   border: isSelected ? 'none' : '1px solid var(--color-border-subtle)',
-                  boxShadow: isSelected ? '0 4px 12px rgba(18, 128, 79, 0.25)' : 'none',
+                  boxShadow: isSelected ? '0 4px 14px var(--color-accent-glow)' : 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
                 }}
               >
                 <span>{tab}</span>
@@ -102,21 +103,18 @@ export const DevicesListPage: React.FC = () => {
           })}
         </div>
 
-        {/* Search input */}
+        {/* Search Field */}
         <input
           type="text"
-          placeholder="Search by ID, customer or farm"
+          placeholder="Filter by ID, customer, farm, or tank..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          className="field-input"
           style={{
-            width: '280px',
-            height: '40px',
+            width: '320px',
+            height: '42px',
             padding: '0 16px',
-            borderRadius: '12px',
-            border: '1px solid var(--color-border-input)',
-            background: 'rgba(255, 255, 255, 0.85)',
             fontSize: '13.5px',
-            outline: 'none',
           }}
         />
       </div>
@@ -126,7 +124,7 @@ export const DevicesListPage: React.FC = () => {
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13.5px', minWidth: '900px' }}>
             <thead>
-              <tr style={{ background: 'rgba(255, 255, 255, 0.4)', borderBottom: '1px solid rgba(20, 60, 40, 0.08)', textAlign: 'left', color: 'var(--color-text-muted)' }}>
+              <tr style={{ background: 'rgba(255, 255, 255, 0.04)', borderBottom: '1px solid var(--color-border-subtle)', textAlign: 'left', color: 'var(--color-text-muted)' }}>
                 <th style={{ padding: '14px 16px', fontWeight: 600 }}>Device</th>
                 <th style={{ padding: '14px 16px', fontWeight: 600 }}>Tank</th>
                 <th style={{ padding: '14px 16px', fontWeight: 600 }}>Customer</th>
@@ -146,12 +144,12 @@ export const DevicesListPage: React.FC = () => {
                     key={dev.id}
                     onClick={() => navigate(`/admin/devices/${dev.id}`)}
                     style={{
-                      borderBottom: '1px solid rgba(20, 60, 40, 0.06)',
+                      borderBottom: '1px solid var(--color-border-subtle)',
                       cursor: 'pointer',
                       transition: 'background 0.15s ease',
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.65)';
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.background = 'transparent';
@@ -207,7 +205,7 @@ export const DevicesListPage: React.FC = () => {
 
                     {/* Firmware */}
                     <td style={{ padding: '14px 16px' }}>
-                      <span className="mono-val" style={{ display: 'block', fontWeight: 600 }}>
+                      <span className="mono-val" style={{ display: 'block', fontWeight: 600, color: 'var(--color-text-main)' }}>
                         {dev.firmware}
                       </span>
                       {isOutdated && (
@@ -218,7 +216,7 @@ export const DevicesListPage: React.FC = () => {
                     </td>
 
                     {/* Last seen */}
-                    <td style={{ padding: '14px 16px', color: 'var(--color-text-muted)' }}>
+                    <td style={{ padding: '14px 16px', color: 'var(--color-text-muted)', fontSize: '13px' }}>
                       {dev.lastSeen}
                     </td>
                   </tr>
@@ -235,7 +233,7 @@ export const DevicesListPage: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            borderTop: '1px solid rgba(20, 60, 40, 0.08)',
+            borderTop: '1px solid var(--color-border-subtle)',
             fontSize: '13px',
             color: 'var(--color-text-muted)',
           }}
@@ -250,11 +248,12 @@ export const DevicesListPage: React.FC = () => {
                 width: '32px',
                 height: '32px',
                 borderRadius: '8px',
-                background: 'rgba(255, 255, 255, 0.8)',
+                background: 'var(--color-surface-elevated)',
                 border: '1px solid var(--color-border-subtle)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                color: 'var(--color-text-main)',
               }}
               aria-label="Previous page"
             >
@@ -266,11 +265,12 @@ export const DevicesListPage: React.FC = () => {
                 width: '32px',
                 height: '32px',
                 borderRadius: '8px',
-                background: 'rgba(255, 255, 255, 0.8)',
+                background: 'var(--color-surface-elevated)',
                 border: '1px solid var(--color-border-subtle)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                color: 'var(--color-text-main)',
               }}
               aria-label="Next page"
             >

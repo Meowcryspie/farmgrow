@@ -18,7 +18,7 @@ export const DeviceDetailPage: React.FC = () => {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* Breadcrumb */}
       <div style={{ fontSize: '13.5px', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-        <Link to="/admin/devices" style={{ color: 'var(--color-accent-green)', fontWeight: 500 }}>
+        <Link to="/admin/devices" style={{ color: 'var(--color-accent-green)', fontWeight: 600 }}>
           Devices
         </Link>
         <span>/</span>
@@ -44,7 +44,7 @@ export const DeviceDetailPage: React.FC = () => {
         </div>
 
         {/* Action Buttons */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
           <button
             className="btn-secondary"
             onClick={() => handleAction('Test command sent. Waiting for the device to acknowledge.')}
@@ -71,16 +71,16 @@ export const DeviceDetailPage: React.FC = () => {
         <div
           style={{
             padding: '12px 18px',
-            borderRadius: '12px',
-            background: 'rgba(230, 246, 238, 0.95)',
+            borderRadius: '14px',
+            background: 'var(--color-accent-glow)',
             border: '1px solid var(--color-accent-green)',
-            color: 'var(--color-accent-dark)',
+            color: 'var(--color-accent-green)',
             fontSize: '14px',
-            fontWeight: 500,
+            fontWeight: 600,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            boxShadow: '0 4px 12px rgba(18, 128, 79, 0.1)',
+            boxShadow: '0 4px 16px var(--color-accent-glow)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -91,190 +91,105 @@ export const DeviceDetailPage: React.FC = () => {
           </div>
           <button
             onClick={() => setActionBanner(null)}
-            style={{ fontSize: '16px', fontWeight: 700, color: 'var(--color-accent-dark)' }}
+            style={{ fontSize: '18px', fontWeight: 700, color: 'var(--color-text-main)' }}
           >
             ×
           </button>
         </div>
       )}
 
-      {/* 2x2 Grid of Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '20px' }}>
-        {/* Card 1: Live reading */}
-        <div className="glass-card" style={{ padding: '22px' }}>
-          <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--color-text-main)', marginBottom: '12px' }}>
-            Live reading
-          </h2>
-
-          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '18px' }}>
-            <div>
-              <span style={{ fontSize: '12px', color: 'var(--color-text-muted)', display: 'block' }}>
-                EC (mS/cm)
-              </span>
-              <span className="mono-val" style={{ fontSize: '38px', fontWeight: 700, color: 'var(--color-red)', lineHeight: 1 }}>
-                2.31
-              </span>
-            </div>
-
-            <div style={{ display: 'flex', gap: '20px', fontSize: '13px' }}>
-              <div>
-                <span style={{ color: 'var(--color-text-muted)', display: 'block' }}>Target</span>
-                <span className="mono-val" style={{ fontWeight: 600, color: 'var(--color-text-main)' }}>2.0</span>
-              </div>
-              <div>
-                <span style={{ color: 'var(--color-text-muted)', display: 'block' }}>Alarm limits</span>
-                <span className="mono-val" style={{ fontWeight: 600, color: 'var(--color-text-main)' }}>1.4 to 2.2</span>
-              </div>
-              <div>
-                <span style={{ color: 'var(--color-text-muted)', display: 'block' }}>Temperature</span>
-                <span className="mono-val" style={{ fontWeight: 600, color: 'var(--color-text-main)' }}>23.1°C</span>
-              </div>
-              <div>
-                <span style={{ color: 'var(--color-text-muted)', display: 'block' }}>Doses per hour</span>
-                <span className="mono-val" style={{ fontWeight: 600, color: 'var(--color-text-main)' }}>5</span>
-              </div>
-            </div>
-          </div>
-
-          {/* 24-hour EC Graph with high limit violation highlight */}
-          <HistoryChart
-            dataPoints={DEVICE_DETAIL_24H_EC}
-            target={2.0}
-            lowLimit={1.4}
-            highLimit={2.2}
-            timeRange="24h"
-            highlightRedAboveLimit={true}
-          />
+      {/* Top 4 Spec Cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
+        <div className="glass-card" style={{ padding: '16px' }}>
+          <span style={{ fontSize: '12px', color: 'var(--color-text-muted)', display: 'block', marginBottom: '6px' }}>Claim Code</span>
+          <span className="mono-val" style={{ fontSize: '18px', fontWeight: 700, color: 'var(--color-text-main)' }}>{deviceId}</span>
         </div>
+        <div className="glass-card" style={{ padding: '16px' }}>
+          <span style={{ fontSize: '12px', color: 'var(--color-text-muted)', display: 'block', marginBottom: '6px' }}>Firmware</span>
+          <span className="mono-val" style={{ fontSize: '18px', fontWeight: 700, color: 'var(--color-text-main)' }}>1.3.1</span>
+        </div>
+        <div className="glass-card" style={{ padding: '16px' }}>
+          <span style={{ fontSize: '12px', color: 'var(--color-text-muted)', display: 'block', marginBottom: '6px' }}>WiFi Signal</span>
+          <span className="mono-val" style={{ fontSize: '18px', fontWeight: 700, color: 'var(--color-accent-green)' }}>-62 dBm (Strong)</span>
+        </div>
+        <div className="glass-card" style={{ padding: '16px' }}>
+          <span style={{ fontSize: '12px', color: 'var(--color-text-muted)', display: 'block', marginBottom: '6px' }}>Last Telemetry</span>
+          <span className="mono-val" style={{ fontSize: '18px', fontWeight: 700, color: 'var(--color-text-main)' }}>12s ago</span>
+        </div>
+      </div>
 
-        {/* Card 2: Connection */}
-        <div className="glass-card" style={{ padding: '22px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+      {/* Historical Telemetry Chart */}
+      <div className="glass-card" style={{ padding: '22px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
           <div>
-            <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--color-text-main)', marginBottom: '16px' }}>
-              Connection
-            </h2>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '13.5px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--color-text-muted)' }}>Status</span>
-                <span className="pill pill-green" style={{ padding: '2px 10px' }}>Online</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--color-text-muted)' }}>Last message</span>
-                <span style={{ color: 'var(--color-text-main)', fontWeight: 500 }}>8 seconds ago</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--color-text-muted)' }}>WiFi network</span>
-                <span style={{ color: 'var(--color-text-main)', fontWeight: 600 }}>GreenLeaf-2.4G</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--color-text-muted)' }}>Signal</span>
-                <span style={{ color: 'var(--color-text-main)', fontWeight: 500 }}>
-                  <strong className="mono-val">-61 dBm</strong>, good
-                </span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--color-text-muted)' }}>Server link</span>
-                <span style={{ color: 'var(--color-text-main)', fontWeight: 500 }}>Encrypted, up 3 d 4 h</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--color-text-muted)' }}>Firmware</span>
-                <span style={{ color: 'var(--color-amber)', fontWeight: 600 }}>
-                  <span className="mono-val">1.3.1</span>, update available
-                </span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--color-text-muted)' }}>Hardware</span>
-                <span style={{ color: 'var(--color-text-main)', fontWeight: 500 }}>EC Mini, rev B</span>
-              </div>
-            </div>
-          </div>
-
-          <button
-            onClick={() => handleAction('Firmware 1.4.0 queued. It installs when the pump is idle.')}
-            className="btn-secondary"
-            style={{ width: '100%', marginTop: '20px', justifyContent: 'center' }}
-          >
-            Update firmware to 1.4.0
-          </button>
-        </div>
-
-        {/* Card 3: Message log */}
-        <div className="glass-card" style={{ padding: '22px' }}>
-          <div style={{ marginBottom: '14px' }}>
-            <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--color-text-main)' }}>
-              Message log
+            <h2 style={{ fontSize: '17px', fontWeight: 700, color: 'var(--color-text-main)' }}>
+              Telemetry Trend (24h)
             </h2>
             <span style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>
-              What the device and the app sent through the server. The controller refuses unsafe values.
+              Interactive scrubber showing EC drift vs configured setpoint
             </span>
           </div>
-
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid rgba(20, 60, 40, 0.1)', textAlign: 'left', color: 'var(--color-text-muted)' }}>
-                <th style={{ padding: '8px 10px 8px 0', fontWeight: 600 }}>Time</th>
-                <th style={{ padding: '8px 10px', fontWeight: 600 }}>Direction</th>
-                <th style={{ padding: '8px 10px', fontWeight: 600 }}>Topic</th>
-                <th style={{ padding: '8px 0 8px 10px', fontWeight: 600 }}>Payload</th>
-              </tr>
-            </thead>
-            <tbody>
-              {DEVICE_MESSAGE_LOG.map((msg, i) => (
-                <tr key={i} style={{ borderBottom: '1px solid rgba(20, 60, 40, 0.06)' }}>
-                  <td className="mono-val" style={{ padding: '10px 10px 10px 0', color: 'var(--color-text-muted)' }}>
-                    {msg.time}
-                  </td>
-                  <td style={{ padding: '10px 10px', color: 'var(--color-text-main)' }}>
-                    {msg.direction}
-                  </td>
-                  <td className="mono-val" style={{ padding: '10px 10px', color: 'var(--color-accent-green)', fontWeight: 600 }}>
-                    {msg.topic}
-                  </td>
-                  <td
-                    className="mono-val"
-                    style={{
-                      padding: '10px 0 10px 10px',
-                      color: msg.isRefused ? 'var(--color-red)' : 'var(--color-text-main)',
-                      fontWeight: msg.isRefused ? 600 : 400,
-                    }}
-                  >
-                    {msg.payload}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <span className="pill pill-red">
+            Peak 2.31 mS/cm
+          </span>
         </div>
 
-        {/* Card 4: Ownership and access */}
-        <div className="glass-card" style={{ padding: '22px' }}>
-          <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--color-text-main)', marginBottom: '16px' }}>
-            Ownership and access
-          </h2>
+        <HistoryChart
+          dataPoints={DEVICE_DETAIL_24H_EC}
+          target={2.0}
+          lowLimit={1.4}
+          highLimit={2.2}
+          timeRange="24h"
+          highlightRedAboveLimit={true}
+        />
+      </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', fontSize: '13.5px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: 'var(--color-text-muted)' }}>Customer</span>
-              <span style={{ color: 'var(--color-text-main)', fontWeight: 600 }}>GreenLeaf Agro Sdn. Bhd.</span>
+      {/* Controller Event & Diagnostic Log */}
+      <div className="glass-card" style={{ padding: '20px' }}>
+        <h2 style={{ fontSize: '17px', fontWeight: 700, color: 'var(--color-text-main)', marginBottom: '14px' }}>
+          Event & Packet Log
+        </h2>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {DEVICE_MESSAGE_LOG.map((log, i) => (
+            <div
+              key={i}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '10px 14px',
+                borderRadius: '10px',
+                background: 'var(--color-surface-elevated)',
+                border: '1px solid var(--color-border-subtle)',
+                fontSize: '13px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span
+                  style={{
+                    width: '7px',
+                    height: '7px',
+                    borderRadius: '50%',
+                    backgroundColor: log.isRefused
+                      ? 'var(--color-red)'
+                      : log.direction.startsWith('App')
+                      ? 'var(--color-amber-tick)'
+                      : 'var(--color-accent-green)',
+                  }}
+                />
+                <span className="mono-val" style={{ fontWeight: 600, color: 'var(--color-text-main)' }}>{log.topic}</span>
+                <span style={{ color: 'var(--color-text-muted)' }}>—</span>
+                <span style={{ color: log.isRefused ? 'var(--color-red)' : 'var(--color-text-main)' }}>{log.payload}</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span className="pill pill-grey" style={{ fontSize: '11px' }}>{log.direction}</span>
+                <span className="mono-val" style={{ color: 'var(--color-text-muted)', fontSize: '12px' }}>
+                  {log.time}
+                </span>
+              </div>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: 'var(--color-text-muted)' }}>Farm</span>
-              <span style={{ color: 'var(--color-text-main)', fontWeight: 600 }}>Farm One, Cameron Highlands</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: 'var(--color-text-muted)' }}>Owner</span>
-              <span style={{ color: 'var(--color-text-main)' }}>Amir Hakim</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: 'var(--color-text-muted)' }}>Paired on</span>
-              <span style={{ color: 'var(--color-text-main)' }}>14 Sep 2026</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: 'var(--color-text-muted)' }}>Also has access</span>
-              <span style={{ color: 'var(--color-text-main)' }}>Farah N. (viewer)</span>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </div>

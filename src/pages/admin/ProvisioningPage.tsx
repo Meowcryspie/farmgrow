@@ -4,7 +4,7 @@ import { QrCodeGraphic } from '../../components/graphics/QrCodeGraphic';
 import { useApp } from '../../context/AppContext';
 
 export const ProvisioningPage: React.FC = () => {
-  const { batchNotice, registerBatch, clearBatchNotice } = useApp();
+  const { batchNotice, registerBatch, clearBatchNotice, showToast } = useApp();
 
   const [hardwareModel, setHardwareModel] = useState('EC Mini, rev B');
   const [unitCount, setUnitCount] = useState(24);
@@ -21,6 +21,7 @@ export const ProvisioningPage: React.FC = () => {
     e.preventDefault();
     const fwVersion = firmware.includes('1.4.0') ? '1.4.0' : '1.3.1';
     registerBatch(unitCount, fwVersion);
+    showToast('Batch Provisioned', `Generated ${unitCount} new device claim tokens with FW ${fwVersion}`, 'success');
   };
 
   return (
@@ -36,7 +37,7 @@ export const ProvisioningPage: React.FC = () => {
       </div>
 
       {/* 4 Process Step Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
         {/* Step 1 */}
         <div className="glass-card" style={{ padding: '16px', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
           <span
@@ -44,7 +45,7 @@ export const ProvisioningPage: React.FC = () => {
               width: '28px',
               height: '28px',
               borderRadius: '50%',
-              backgroundColor: 'var(--color-accent-dark)',
+              backgroundColor: 'var(--color-accent-green)',
               color: '#FFFFFF',
               fontWeight: 700,
               fontSize: '13px',
@@ -73,7 +74,7 @@ export const ProvisioningPage: React.FC = () => {
               width: '28px',
               height: '28px',
               borderRadius: '50%',
-              backgroundColor: 'var(--color-accent-dark)',
+              backgroundColor: 'var(--color-accent-green)',
               color: '#FFFFFF',
               fontWeight: 700,
               fontSize: '13px',
@@ -102,7 +103,7 @@ export const ProvisioningPage: React.FC = () => {
               width: '28px',
               height: '28px',
               borderRadius: '50%',
-              backgroundColor: 'var(--color-accent-dark)',
+              backgroundColor: 'var(--color-accent-green)',
               color: '#FFFFFF',
               fontWeight: 700,
               fontSize: '13px',
@@ -131,7 +132,7 @@ export const ProvisioningPage: React.FC = () => {
               width: '28px',
               height: '28px',
               borderRadius: '50%',
-              backgroundColor: 'var(--color-accent-dark)',
+              backgroundColor: 'var(--color-accent-green)',
               color: '#FFFFFF',
               fontWeight: 700,
               fontSize: '13px',
@@ -145,49 +146,58 @@ export const ProvisioningPage: React.FC = () => {
           </span>
           <div>
             <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--color-text-main)', marginBottom: '3px' }}>
-              It appears
+              Live
             </h3>
             <p style={{ fontSize: '12.5px', color: 'var(--color-text-muted)', lineHeight: 1.35 }}>
-              The device shows up in their farm and in your Devices list.
+              The device appears on the customer's dashboard and admin fleet view.
             </p>
           </div>
         </div>
       </div>
 
-      {/* Main Provisioning Layout: 2 Columns */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-        {/* Left Column: Form and Sticker Preview */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {/* Register a batch Card */}
-          <div className="glass-card" style={{ padding: '24px' }}>
-            <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--color-text-main)', marginBottom: '18px' }}>
-              Register a batch
-            </h2>
+      {/* Batch Generated Confirmation Banner */}
+      {batchNotice && (
+        <div
+          style={{
+            padding: '14px 18px',
+            borderRadius: '14px',
+            background: 'var(--color-accent-glow)',
+            border: '1px solid var(--color-accent-green)',
+            color: 'var(--color-accent-green)',
+            fontSize: '14.5px',
+            fontWeight: 500,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            boxShadow: '0 4px 16px var(--color-accent-glow)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 6L9 17l-5-5" />
+            </svg>
+            <span>
+              <strong>{batchNotice.count} devices registered</strong> in batch {batchNotice.batchId} with firmware {batchNotice.firmware}. Labels ready to print.
+            </span>
+          </div>
+          <button
+            onClick={clearBatchNotice}
+            style={{ fontSize: '18px', fontWeight: 700, color: 'var(--color-text-main)', padding: '0 4px' }}
+          >
+            ×
+          </button>
+        </div>
+      )}
 
-            {batchNotice && (
-              <div
-                style={{
-                  padding: '12px 16px',
-                  borderRadius: '12px',
-                  background: 'rgba(230, 246, 238, 0.95)',
-                  border: '1px solid var(--color-accent-green)',
-                  color: 'var(--color-accent-dark)',
-                  fontSize: '13.5px',
-                  fontWeight: 500,
-                  marginBottom: '18px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                }}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 6L9 17l-5-5" />
-                </svg>
-                <span>
-                  <strong>{batchNotice.count} devices</strong> registered in batch <strong>{batchNotice.batchId}</strong> with firmware <strong>{batchNotice.firmware}</strong>. The label sheet is ready to print.
-                </span>
-              </div>
-            )}
+      {/* 2-Column Main Section */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '22px' }}>
+        {/* Left Column: Form and Sticker Preview */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+          {/* Register Form */}
+          <div className="glass-card" style={{ padding: '24px' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--color-text-main)', marginBottom: '16px' }}>
+              Register a new batch
+            </h2>
 
             <form onSubmit={handleGenerate} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div className="field-group">
@@ -196,10 +206,7 @@ export const ProvisioningPage: React.FC = () => {
                   id="model-select"
                   className="field-select"
                   value={hardwareModel}
-                  onChange={(e) => {
-                    setHardwareModel(e.target.value);
-                    handleInputChange();
-                  }}
+                  onChange={(e) => { setHardwareModel(e.target.value); handleInputChange(); }}
                 >
                   <option value="EC Mini, rev B">EC Mini, rev B</option>
                   <option value="EC Mini, rev A">EC Mini, rev A</option>
@@ -207,35 +214,28 @@ export const ProvisioningPage: React.FC = () => {
               </div>
 
               <div className="field-group">
-                <label className="field-label" htmlFor="units-count">Number of units</label>
+                <label className="field-label" htmlFor="units-input">Number of units</label>
                 <input
-                  id="units-count"
+                  id="units-input"
                   type="number"
+                  min="1"
+                  max="500"
                   className="field-input mono-val"
                   value={unitCount}
-                  onChange={(e) => {
-                    setUnitCount(parseInt(e.target.value) || 0);
-                    handleInputChange();
-                  }}
-                  min="1"
-                  max="1000"
-                  required
+                  onChange={(e) => { setUnitCount(parseInt(e.target.value) || 1); handleInputChange(); }}
                 />
               </div>
 
               <div className="field-group">
-                <label className="field-label" htmlFor="fw-select">Firmware to install</label>
+                <label className="field-label" htmlFor="firmware-select">Initial firmware</label>
                 <select
-                  id="fw-select"
+                  id="firmware-select"
                   className="field-select"
                   value={firmware}
-                  onChange={(e) => {
-                    setFirmware(e.target.value);
-                    handleInputChange();
-                  }}
+                  onChange={(e) => { setFirmware(e.target.value); handleInputChange(); }}
                 >
                   <option value="1.4.0 (latest)">1.4.0 (latest)</option>
-                  <option value="1.3.1">1.3.1</option>
+                  <option value="1.3.1 (stable)">1.3.1 (stable)</option>
                 </select>
               </div>
 
@@ -244,27 +244,22 @@ export const ProvisioningPage: React.FC = () => {
                 <input
                   id="distributor-input"
                   type="text"
+                  placeholder="e.g. AgriSupply Southeast Asia"
                   className="field-input"
-                  placeholder="Leave empty if not assigned"
                   value={distributor}
-                  onChange={(e) => {
-                    setDistributor(e.target.value);
-                    handleInputChange();
-                  }}
+                  onChange={(e) => { setDistributor(e.target.value); handleInputChange(); }}
                 />
               </div>
 
-              <button
-                type="submit"
-                className="btn-primary"
-                style={{ height: '48px', marginTop: '10px' }}
-              >
-                Generate IDs and claim codes
-              </button>
+              <div style={{ marginTop: '8px' }}>
+                <button type="submit" className="btn-primary" style={{ height: '48px' }}>
+                  Generate IDs and claim codes
+                </button>
+              </div>
             </form>
           </div>
 
-          {/* Label Preview Card */}
+          {/* Label Preview */}
           <div className="glass-card" style={{ padding: '24px' }}>
             <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--color-text-main)', marginBottom: '16px' }}>
               Label preview (example)
@@ -273,11 +268,11 @@ export const ProvisioningPage: React.FC = () => {
             {/* Sticker Graphic Container */}
             <div
               style={{
-                background: '#FFFFFF',
+                background: 'var(--color-surface-elevated)',
                 borderRadius: '16px',
-                border: '1px solid rgba(20, 60, 40, 0.15)',
+                border: '1px solid var(--color-border-subtle)',
                 padding: '20px',
-                boxShadow: '0 8px 24px rgba(20, 60, 40, 0.08)',
+                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.1)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '20px',
@@ -318,7 +313,7 @@ export const ProvisioningPage: React.FC = () => {
 
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13.5px' }}>
             <thead>
-              <tr style={{ borderBottom: '1px solid rgba(20, 60, 40, 0.1)', textAlign: 'left', color: 'var(--color-text-muted)' }}>
+              <tr style={{ borderBottom: '1px solid var(--color-border-subtle)', textAlign: 'left', color: 'var(--color-text-muted)' }}>
                 <th style={{ padding: '10px 8px 10px 0', fontWeight: 600 }}>Device ID</th>
                 <th style={{ padding: '10px 8px', fontWeight: 600 }}>Registered</th>
                 <th style={{ padding: '10px 8px', fontWeight: 600 }}>Waiting</th>
@@ -331,7 +326,7 @@ export const ProvisioningPage: React.FC = () => {
                 const isWaitingWifi = w.status.includes('waiting for WiFi');
 
                 return (
-                  <tr key={w.deviceId} style={{ borderBottom: '1px solid rgba(20, 60, 40, 0.06)' }}>
+                  <tr key={w.deviceId} style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
                     <td className="mono-val" style={{ padding: '12px 8px 12px 0', fontWeight: 600, color: 'var(--color-text-main)' }}>
                       {w.deviceId}
                     </td>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   FLEET_KPI,
@@ -10,6 +10,7 @@ import {
 
 export const FleetOverviewPage: React.FC = () => {
   const navigate = useNavigate();
+  const [search, setSearch] = useState('');
 
   // Draw 24h Area Graph
   const renderOnlineGraph = () => {
@@ -34,7 +35,7 @@ export const FleetOverviewPage: React.FC = () => {
     };
 
     const points = FLEET_ONLINE_24H_POINTS.map((val, idx) => ({ x: getX(idx), y: getY(val), val }));
-    const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+    const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
     const areaPath = `${linePath} L ${plotRight} ${plotBottom} L ${plotLeft} ${plotBottom} Z`;
 
     const dipPoint = points[7]; // 92.1% at -12h
@@ -43,74 +44,86 @@ export const FleetOverviewPage: React.FC = () => {
       <svg viewBox={`0 0 ${width} ${height}`} width="100%" role="img" aria-label="Share of paired devices online line chart">
         <defs>
           <linearGradient id="adminAreaGrad" x1="0%" y1="0%" x2="0%" y2="1">
-            <stop offset="0%" stopColor="#12804F" stopOpacity="0.25" />
-            <stop offset="100%" stopColor="#12804F" stopOpacity="0.02" />
+            <stop offset="0%" stopColor="var(--color-accent-green)" stopOpacity="0.30" />
+            <stop offset="100%" stopColor="var(--color-accent-green)" stopOpacity="0.01" />
           </linearGradient>
+          <filter id="adminGlow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="var(--color-accent-green)" floodOpacity="0.4" />
+          </filter>
         </defs>
 
         {/* Horizontal grid lines */}
-        <line x1={plotLeft} y1={getY(100)} x2={plotRight} y2={getY(100)} stroke="rgba(20, 60, 40, 0.08)" strokeWidth="1" />
-        <line x1={plotLeft} y1={getY(95)} x2={plotRight} y2={getY(95)} stroke="rgba(20, 60, 40, 0.08)" strokeWidth="1" />
-        <line x1={plotLeft} y1={getY(90)} x2={plotRight} y2={getY(90)} stroke="rgba(20, 60, 40, 0.08)" strokeWidth="1" />
+        <line x1={plotLeft} y1={getY(100)} x2={plotRight} y2={getY(100)} stroke="var(--color-border-subtle)" strokeWidth="1" />
+        <line x1={plotLeft} y1={getY(95)} x2={plotRight} y2={getY(95)} stroke="var(--color-border-subtle)" strokeWidth="1" />
+        <line x1={plotLeft} y1={getY(90)} x2={plotRight} y2={getY(90)} stroke="var(--color-border-subtle)" strokeWidth="1" />
 
         {/* Y Axis labels */}
-        <text x={plotLeft - 8} y={getY(100) + 4} textAnchor="end" fill="#52645A" fontSize="10" fontFamily="'IBM Plex Mono', monospace">100%</text>
-        <text x={plotLeft - 8} y={getY(95) + 4} textAnchor="end" fill="#52645A" fontSize="10" fontFamily="'IBM Plex Mono', monospace">95%</text>
-        <text x={plotLeft - 8} y={getY(90) + 4} textAnchor="end" fill="#52645A" fontSize="10" fontFamily="'IBM Plex Mono', monospace">90%</text>
+        <text x={plotLeft - 8} y={getY(100) + 4} textAnchor="end" fill="var(--color-text-muted)" fontSize="10" fontFamily="var(--font-mono)">100%</text>
+        <text x={plotLeft - 8} y={getY(95) + 4} textAnchor="end" fill="var(--color-text-muted)" fontSize="10" fontFamily="var(--font-mono)">95%</text>
+        <text x={plotLeft - 8} y={getY(90) + 4} textAnchor="end" fill="var(--color-text-muted)" fontSize="10" fontFamily="var(--font-mono)">90%</text>
 
         {/* Filled Area */}
         <path d={areaPath} fill="url(#adminAreaGrad)" />
 
         {/* Line Curve */}
-        <path d={linePath} fill="none" stroke="#12804F" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+        <path d={linePath} fill="none" stroke="var(--color-accent-green)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" filter="url(#adminGlow)" />
 
         {/* Dip marker at 92.1% */}
-        <circle cx={dipPoint.x} cy={dipPoint.y} r="4" fill="#C23B32" stroke="#FFFFFF" strokeWidth="1.8" />
-        <text x={dipPoint.x} y={dipPoint.y - 8} textAnchor="middle" fill="#C23B32" fontSize="10.5" fontWeight="600" fontFamily="'IBM Plex Mono', monospace">
+        <circle cx={dipPoint.x} cy={dipPoint.y} r="4.5" fill="var(--color-red)" stroke="#FFFFFF" strokeWidth="2" />
+        <text x={dipPoint.x} y={dipPoint.y - 8} textAnchor="middle" fill="var(--color-red)" fontSize="10.5" fontWeight="600" fontFamily="var(--font-mono)">
           92.1%
         </text>
 
         {/* X Axis baseline */}
-        <line x1={plotLeft} y1={plotBottom} x2={plotRight} y2={plotBottom} stroke="#DCE8E0" strokeWidth="1" />
+        <line x1={plotLeft} y1={plotBottom} x2={plotRight} y2={plotBottom} stroke="var(--color-border-subtle)" strokeWidth="1" />
 
         {/* X Axis labels */}
-        <text x={plotLeft} y={height - 6} textAnchor="start" fill="#52645A" fontSize="10" fontFamily="'IBM Plex Mono', monospace">-24h</text>
-        <text x={getX(3)} y={height - 6} textAnchor="middle" fill="#52645A" fontSize="10" fontFamily="'IBM Plex Mono', monospace">-18h</text>
-        <text x={getX(6)} y={height - 6} textAnchor="middle" fill="#52645A" fontSize="10" fontFamily="'IBM Plex Mono', monospace">-12h</text>
-        <text x={getX(9)} y={height - 6} textAnchor="middle" fill="#52645A" fontSize="10" fontFamily="'IBM Plex Mono', monospace">-6h</text>
-        <text x={plotRight} y={height - 6} textAnchor="end" fill="#52645A" fontSize="10" fontFamily="'IBM Plex Mono', monospace">Now</text>
+        <text x={plotLeft} y={height - 6} textAnchor="start" fill="var(--color-text-muted)" fontSize="10" fontFamily="var(--font-mono)">-24h</text>
+        <text x={getX(3)} y={height - 6} textAnchor="middle" fill="var(--color-text-muted)" fontSize="10" fontFamily="var(--font-mono)">-18h</text>
+        <text x={getX(6)} y={height - 6} textAnchor="middle" fill="var(--color-text-muted)" fontSize="10" fontFamily="var(--font-mono)">-12h</text>
+        <text x={getX(9)} y={height - 6} textAnchor="middle" fill="var(--color-text-muted)" fontSize="10" fontFamily="var(--font-mono)">-6h</text>
+        <text x={plotRight} y={height - 6} textAnchor="end" fill="var(--color-text-muted)" fontSize="10" fontFamily="var(--font-mono)">Now</text>
       </svg>
     );
   };
 
+  const filteredAttention = ATTENTION_LIST.filter((item) => {
+    if (!search.trim()) return true;
+    const q = search.toLowerCase();
+    return (
+      item.deviceId.toLowerCase().includes(q) ||
+      item.customer.toLowerCase().includes(q) ||
+      item.tankAndFarm.toLowerCase().includes(q)
+    );
+  });
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '26px' }}>
       {/* Top Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <h1 style={{ fontSize: '30px', fontWeight: 700, color: 'var(--color-text-main)', letterSpacing: '-0.5px' }}>
             Fleet overview
           </h1>
           <p style={{ fontSize: '14px', color: 'var(--color-text-muted)' }}>
-            All customers and locations. Sample data.
+            Real-time telemetry and fleet health across all commercial greenhouse installations.
           </p>
         </div>
 
         {/* Search & Notification Bell */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{ position: 'relative' }}>
             <input
               type="text"
               placeholder="Search devices or customers"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="field-input"
               style={{
                 width: '280px',
                 height: '42px',
                 padding: '0 16px',
-                borderRadius: '12px',
-                border: '1px solid var(--color-border-input)',
-                background: 'rgba(255, 255, 255, 0.85)',
                 fontSize: '13.5px',
-                outline: 'none',
               }}
             />
           </div>
@@ -120,12 +133,13 @@ export const FleetOverviewPage: React.FC = () => {
               width: '42px',
               height: '42px',
               borderRadius: '12px',
-              background: 'rgba(255, 255, 255, 0.85)',
+              background: 'var(--color-surface-elevated)',
               border: '1px solid var(--color-border-input)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               position: 'relative',
+              color: 'var(--color-text-main)',
             }}
             aria-label="Notifications"
           >
@@ -149,7 +163,7 @@ export const FleetOverviewPage: React.FC = () => {
       </div>
 
       {/* 4 KPI Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
         {/* Card 1: Registered */}
         <div className="glass-card" style={{ padding: '18px 20px' }}>
           <span style={{ fontSize: '13px', color: 'var(--color-text-muted)', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
@@ -204,7 +218,7 @@ export const FleetOverviewPage: React.FC = () => {
       </div>
 
       {/* Middle Row: Online 24h & Locations */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '20px' }}>
         {/* Card: Devices online, last 24 hours */}
         <div className="glass-card" style={{ padding: '22px' }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '14px' }}>
@@ -248,7 +262,7 @@ export const FleetOverviewPage: React.FC = () => {
                       <strong className="mono-val" style={{ color: 'var(--color-text-main)' }}>{loc.online}</strong> of {loc.total} online
                     </span>
                   </div>
-                  <div style={{ width: '100%', height: '6px', background: '#DCE8E0', borderRadius: '3px', overflow: 'hidden' }}>
+                  <div style={{ width: '100%', height: '6px', background: 'var(--color-track-grey)', borderRadius: '3px', overflow: 'hidden' }}>
                     <div style={{ width: `${pct}%`, height: '100%', backgroundColor: barColor, borderRadius: '3px' }} />
                   </div>
                 </div>
@@ -259,9 +273,9 @@ export const FleetOverviewPage: React.FC = () => {
       </div>
 
       {/* Bottom Row: Needs attention & Recent activity */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '20px' }}>
         {/* Needs attention Table */}
-        <div className="glass-card" style={{ padding: '22px' }}>
+        <div className="glass-card" style={{ padding: '22px', overflowX: 'auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
             <h2 style={{ fontSize: '17px', fontWeight: 700, color: 'var(--color-text-main)' }}>
               Needs attention
@@ -270,13 +284,13 @@ export const FleetOverviewPage: React.FC = () => {
               to="/admin/devices"
               style={{ fontSize: '13.5px', fontWeight: 600, color: 'var(--color-accent-green)' }}
             >
-              View all devices
+              View all devices →
             </Link>
           </div>
 
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13.5px' }}>
             <thead>
-              <tr style={{ borderBottom: '1px solid rgba(20, 60, 40, 0.1)', textAlign: 'left', color: 'var(--color-text-muted)' }}>
+              <tr style={{ borderBottom: '1px solid var(--color-border-subtle)', textAlign: 'left', color: 'var(--color-text-muted)' }}>
                 <th style={{ padding: '8px 10px 10px 0', fontWeight: 600 }}>Device</th>
                 <th style={{ padding: '8px 10px 10px 10px', fontWeight: 600 }}>Customer</th>
                 <th style={{ padding: '8px 10px 10px 10px', fontWeight: 600 }}>Issue</th>
@@ -285,7 +299,7 @@ export const FleetOverviewPage: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {ATTENTION_LIST.map((item) => {
+              {filteredAttention.map((item) => {
                 let statusClass = 'pill-amber';
                 if (item.status === 'Alarm') statusClass = 'pill-red';
                 else if (item.status === 'Offline') statusClass = 'pill-grey';
@@ -295,8 +309,9 @@ export const FleetOverviewPage: React.FC = () => {
                     key={item.deviceId}
                     onClick={() => navigate(`/admin/devices/${item.deviceId}`)}
                     style={{
-                      borderBottom: '1px solid rgba(20, 60, 40, 0.06)',
+                      borderBottom: '1px solid var(--color-border-subtle)',
                       cursor: 'pointer',
+                      transition: 'background 0.15s ease',
                     }}
                   >
                     <td style={{ padding: '12px 10px 12px 0' }}>
@@ -307,7 +322,7 @@ export const FleetOverviewPage: React.FC = () => {
                         {item.tankAndFarm}
                       </span>
                     </td>
-                    <td style={{ padding: '12px 10px' }}>{item.customer}</td>
+                    <td style={{ padding: '12px 10px', color: 'var(--color-text-main)' }}>{item.customer}</td>
                     <td style={{ padding: '12px 10px', color: 'var(--color-text-main)' }}>{item.issue}</td>
                     <td style={{ padding: '12px 10px', color: 'var(--color-text-muted)' }}>{item.since}</td>
                     <td style={{ padding: '12px 0 12px 10px', textAlign: 'right' }}>
